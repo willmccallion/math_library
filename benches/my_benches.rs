@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use glam::f32 as glam_f32;
-use vecmath::prelude::*;
+use mathtools::prelude::*;
 
 fn normalize_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("Vec3 Normalize");

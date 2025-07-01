@@ -19,7 +19,7 @@ impl<T: Copy + One + Zero> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec4};
+    /// # use mathtools::{Mat4, Vec4};
     /// let m = Mat4::new(
     ///     Vec4::new(1i32, 2, 3, 4),
     ///     Vec4::new(5, 6, 7, 8),
@@ -42,7 +42,7 @@ impl<T: Copy + One + Zero> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec4};
+    /// # use mathtools::{Mat4, Vec4};
     /// let id = Mat4::<f32>::identity();
     /// let v = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// assert_eq!(id * v, v);
@@ -70,7 +70,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec3, Vec4};
+    /// # use mathtools::{Mat4, Vec3, Vec4};
     /// let t = Mat4::from_translation(Vec3::new(10.0f32, 20.0, 30.0));
     /// let p = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// let p_translated = t * p;
@@ -88,7 +88,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec3, Vec4};
+    /// # use mathtools::{Mat4, Vec3, Vec4};
     /// let s = Mat4::from_scale(Vec3::new(2.0f32, 3.0, 4.0));
     /// let v = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// let v_scaled = s * v;
@@ -112,7 +112,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec3, Vec4};
+    /// # use mathtools::{Mat4, Vec3, Vec4};
     /// # use core::f32::consts::FRAC_PI_2;
     /// let r = Mat4::from_axis_angle(Vec3::new(0.0f32, 1.0, 0.0), FRAC_PI_2);
     /// let v = Vec4::new(1.0, 0.0, 0.0, 1.0);
@@ -165,7 +165,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec3, Vec4};
+    /// # use mathtools::{Mat4, Vec3, Vec4};
     /// let eye = Vec3::new(0.0f32, 0.0, 5.0);
     /// let target = Vec3::new(0.0, 0.0, 0.0);
     /// let up = Vec3::new(0.0, 1.0, 0.0);
@@ -220,7 +220,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec4};
+    /// # use mathtools::{Mat4, Vec4};
     /// # use core::f32::consts::FRAC_PI_2;
     /// let aspect_ratio = 16.0 / 9.0;
     /// let fovy = FRAC_PI_2; // 90 degrees
@@ -273,7 +273,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec4};
+    /// # use mathtools::{Mat4, Vec4};
     /// let m = Mat4::new(
     ///     Vec4::new(1.0f32, 2.0, 3.0, 4.0),
     ///     Vec4::new(5.0, 6.0, 7.0, 8.0),
@@ -299,7 +299,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Mat4, Vec3};
+    /// # use mathtools::{Mat4, Vec3};
     /// let m = Mat4::from_translation(Vec3::new(10.0f32, -5.0, 2.0));
     /// let m_inv = m.inverse().unwrap();
     /// let identity = m * m_inv;

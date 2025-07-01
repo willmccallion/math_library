@@ -20,7 +20,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec2;
+            /// # use mathtools::Vec2;
             /// let v = Vec2::new(1.0f32, 2.0f32);
             /// assert_eq!(v.x, 1.0);
             /// assert_eq!(v.y, 2.0);
@@ -35,7 +35,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec3;
+            /// # use mathtools::Vec3;
             /// let v = Vec3::splat(5.0f32);
             /// assert_eq!(v, Vec3::new(5.0, 5.0, 5.0));
             /// ```
@@ -51,7 +51,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec2;
+            /// # use mathtools::Vec2;
             /// let v: Vec2<f32> = Default::default();
             /// assert_eq!(v, Vec2::new(0.0, 0.0));
             /// ```
@@ -67,7 +67,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec3;
+            /// # use mathtools::Vec3;
             /// let arr = [1i32, 2, 3];
             /// let v = Vec3::from(arr);
             /// assert_eq!(v.x, 1);
@@ -85,7 +85,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec3;
+            /// # use mathtools::Vec3;
             /// let v = Vec3::new(1i32, 2, 3);
             /// let arr: [i32; 3] = v.into();
             /// assert_eq!(arr, [1, 2, 3]);
@@ -193,7 +193,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec3;
+            /// # use mathtools::Vec3;
             /// let v1 = Vec3::new(1.0f32, 2.0, 3.0);
             /// let v2 = Vec3::new(4.0, 5.0, 6.0);
             /// assert_eq!(v1.dot(v2), 32.0);
@@ -217,7 +217,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec2;
+            /// # use mathtools::Vec2;
             /// let v = Vec2::new(3.0f32, 4.0f32);
             /// assert_eq!(v.length_squared(), 25.0);
             /// ```
@@ -231,7 +231,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec2;
+            /// # use mathtools::Vec2;
             /// let v = Vec2::new(3.0f32, 4.0f32);
             /// assert_eq!(v.length(), 5.0);
             /// ```
@@ -247,7 +247,7 @@ macro_rules! impl_vector {
             /// # Examples
             ///
             /// ```
-            /// # use vecmath::Vec2;
+            /// # use mathtools::Vec2;
             /// let v = Vec2::new(3.0f32, 4.0f32);
             /// let norm = v.normalize();
             /// assert!((norm.length() - 1.0f32).abs() < 1e-6);
@@ -309,7 +309,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::Vec3;
+    /// # use mathtools::Vec3;
     /// let i = Vec3::new(1.0f32, 0.0, 0.0);
     /// let j = Vec3::new(0.0, 1.0, 0.0);
     /// let k = Vec3::new(0.0, 0.0, 1.0);
@@ -333,7 +333,7 @@ impl<T: Copy + Zero + One> Vec3<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Vec3, Vec4};
+    /// # use mathtools::{Vec3, Vec4};
     /// let v3 = Vec3::new(1i32, 2, 3);
     /// let v4 = v3.to_vec4_point();
     /// assert_eq!(v4, Vec4::new(1, 2, 3, 1));
@@ -350,7 +350,7 @@ impl<T: Copy + Zero + One> Vec3<T> {
     /// # Examples
     ///
     /// ```
-    /// # use vecmath::{Vec3, Vec4};
+    /// # use mathtools::{Vec3, Vec4};
     /// let v3 = Vec3::new(1i32, 2, 3);
     /// let v4 = v3.to_vec4_vector();
     /// assert_eq!(v4, Vec4::new(1, 2, 3, 0));

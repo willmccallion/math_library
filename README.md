@@ -1,14 +1,14 @@
-# vecmath
+# mathtools
 
 <!--
 -->
 
-[![Crates.io](https://img.shields.io/crates/v/vecmath.svg)](https://crates.io/crates/vecmath)
-[![Docs.rs](https://docs.rs/vecmath/badge.svg)](https://docs.rs/vecmath)
+[![Crates.io](https://img.shields.io/crates/v/mathtools.svg)](https://crates.io/crates/mathtools)
+[![Docs.rs](https://docs.rs/mathtools/badge.svg)](https://docs.rs/mathtools)
 [![Licence](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#licence)
 
 <!--
-[![CI](https://github.com/willmccallion/vecmath/actions/workflows/ci.yml/badge.svg)](https://github.com/willmccallion/vecmath/actions/workflows/ci.yml)
+[![CI](https://github.com/willmccallion/mathtools/actions/workflows/ci.yml/badge.svg)](https://github.com/willmccallion/mathtools/actions/workflows/ci.yml)
 -->
 
 A lightweight, portable, and performant linear algebra library for graphics and game development, written in pure, stable Rust.
@@ -17,7 +17,7 @@ This library provides `Vec2`, `Vec3`, `Vec4`, and `Mat4` types with a rich and e
 
 ## Key Features
 
-* **⚡ Performant:** Best-in-class scalar performance. For fundamental vector operations like dot and cross products, `vecmath` is on par with or faster than top-tier SIMD libraries. See the [Performance](#performance) section for details.
+* **⚡ Performant:** Best-in-class scalar performance. For fundamental vector operations like dot and cross products, `mathtools` is on par with or faster than top-tier SIMD libraries. See the [Performance](#performance) section for details.
 * **📦 Portable & `no_std`:** Fully compatible with `no_std` environments for use in embedded systems, WebAssembly, and OS development. The library is `no_std` by default.
 * **🎛️ Optional `serde` Support:** Easily serialize and deserialize all vector and matrix types by enabling the `serde` feature.
 * **🧑‍💻 Ergonomic API:** Uses standard Rust operators (`+`, `-`, `*`) for intuitive vector and matrix arithmetic. The API is designed to be clear, consistent, and easy to use.
@@ -25,20 +25,20 @@ This library provides `Vec2`, `Vec3`, `Vec4`, and `Mat4` types with a rich and e
 
 ## Usage & Features
 
-Add `vecmath` to your `Cargo.toml`. Here are some common configurations:
+Add `mathtools` to your `Cargo.toml`. Here are some common configurations:
 
 ### For `std` environments (Recommended for most applications)
 
 ```toml
 [dependencies]
-vecmath = { version = "0.1.0", features = ["std"] }
+mathtools = { version = "0.1.0", features = ["std"] }
 ```
 
 ### For `no_std` environments
 
 ```toml
 [dependencies]
-vecmath = { version = "0.1.0", default-features = false }
+mathtools = { version = "0.1.0", default-features = false }
 ```
 
 ### With `serde` Support
@@ -47,26 +47,26 @@ vecmath = { version = "0.1.0", default-features = false }
 
 ```toml
 [dependencies]
-vecmath = { version = "0.1.0", features = ["std", "serde"] }
+mathtools = { version = "0.1.0", features = ["std", "serde"] }
 ```
 
 #### For no\_std environments
 
 ```toml
 [dependencies]
-vecmath = { version = "0.1.0", default-features = false, features = ["serde"] }
+mathtools = { version = "0.1.0", default-features = false, features = ["serde"] }
 ```
 
 Then, import the types you need, ideally through the provided prelude:
 
 ```rust
-use vecmath::prelude::*;
+use mathtools::prelude::*;
 ```
 
 ### Quick Start Vector Operations
 
 ```rust
-use vecmath::prelude::*;
+use mathtools::prelude::*;
 
 // Vector creation and arithmetic
 let v1 = Vec2::new(1.0f32, 2.0);
@@ -95,7 +95,7 @@ assert!((norm_v.length() - 1.0).abs() < 1e-6);
 `Mat4` can be used to build complex 3D transformations. Transformations are applied from right to left (`translation * rotation * scale * point`)
 
 ```rust
-use vecmath::prelude::*;
+use mathtools::prelude::*;
 use core::f32::consts::FRAC_PI_2; // 90 degrees
 
 // 1. A point to be transformed.
@@ -126,10 +126,10 @@ assert!((transformed_point.z - expected_point.z).abs() < 1e-6);
 
 This library provides excellent scalar performance. Benchmarks against `glam` (a popular SIMD-accelerated library) show:
 
-* **Vector Operations:** `vecmath` is on par with or faster than `glam` for fundamental operations like dot product, cross product, and normalization.
-* **Matrix Operations:** For complex, parallelizable operations like matrix multiplication and inversion, `glam`'s SIMD implementation provides an expected speedup. `vecmath` still offers highly competitive performance for a portable, scalar library.
+* **Vector Operations:** `mathtools` is on par with or faster than `glam` for fundamental operations like dot product, cross product, and normalization.
+* **Matrix Operations:** For complex, parallelizable operations like matrix multiplication and inversion, `glam`'s SIMD implementation provides an expected speedup. `mathtools` still offers highly competitive performance for a portable, scalar library.
 
-This makes `vecmath` an ideal choice where portability and a simple, robust design are priorities.
+This makes `mathtools` an ideal choice where portability and a simple, robust design are priorities.
 
 ## Development
 
@@ -156,7 +156,7 @@ cargo bench
 
 ## Licence
 
-This project is dual-licensed under your choice of either the [MIT License](https://github.com/willmccallion/vecmath/blob/main/LICENCE-MIT) or the [Apache License, Version 2.0](https://github.com/willmccallion/vecmath/blob/main/LICENCE-APACHE).
+This project is dual-licensed under your choice of either the [MIT License](https://github.com/willmccallion/mathtools/blob/main/LICENCE-MIT) or the [Apache License, Version 2.0](https://github.com/willmccallion/mathtools/blob/main/LICENCE-APACHE).
 
 ### Contribution
 
