@@ -1,24 +1,4 @@
-//! # My Awesome Math Library
-//!
-//! A simple and fast 2D/3D/4D math library for graphics and games,
-//! written as a learning exercise.
-//!
-//! ## Usage
-//!
-//! Add this to your `Cargo.toml`:
-//! ```toml
-//! [dependencies]
-//! math_library = "0.1.0"
-//! ```
-//!
-//! And then you can use the types in your code:
-//!
-//! ```
-//! use math_library::{Vec3, Mat4};
-//!
-//! let point = Vec3::new(1.0, 2.0, 3.0);
-//! // ...
-//! ```
+#![doc = include_str!("../README.md")]
 
 // Declare the modules
 pub mod matrix;

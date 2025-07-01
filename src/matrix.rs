@@ -3,6 +3,7 @@ use num_traits::{Float, One, Zero};
 use std::ops::{Add, Mul, MulAssign};
 
 /// A 4x4, column-major matrix.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4<T> {
@@ -104,6 +105,10 @@ impl<T: Float> Mat4<T> {
 
     /// Creates a rotation matrix around an arbitrary axis.
     ///
+    /// # Panics
+    ///
+    /// Panics if the `axis` vector has a length of zero.
+    ///
     /// # Examples
     ///
     /// ```
@@ -152,6 +157,11 @@ impl<T: Float> Mat4<T> {
 
     /// Creates a view matrix that looks from `eye` towards `target` with a given `up` direction.
     ///
+    /// # Panics
+    ///
+    /// Panics if `eye` and `target` are too close, resulting in a zero-length direction vector.
+    /// Also panics if the `up` vector is parallel to the direction from `eye` to `target`.
+    ///
     /// # Examples
     ///
     /// ```
@@ -166,7 +176,6 @@ impl<T: Float> Mat4<T> {
     /// let transformed_point = view_matrix * point_at_origin;
     /// assert_eq!(transformed_point, Vec4::new(0.0, 0.0, -5.0, 1.0));
     /// ```
-    // In matrix.rs
     pub fn look_at(eye: Vec3<T>, target: Vec3<T>, up: Vec3<T>) -> Self {
         let f_unnormalized = target - eye;
 
@@ -592,21 +601,19 @@ mod tests {
     }
 
     #[test]
-    #[should_panic] // Your implementation should panic if the view direction is zero.
-    fn test_look_at_eye_equals_target() {
+    #[should_panic(expected = "The 'eye' and 'target' positions cannot be the same.")]
+    fn test_look_at_panics_on_zero_direction() {
         let eye = Vec3::new(1.0, 2.0, 3.0);
         let up = Vec3::new(0.0, 1.0, 0.0);
-        // This creates a zero-length forward vector, which cannot be normalized.
         let _view = Mat4::look_at(eye, eye, up);
     }
 
     #[test]
-    #[should_panic] // Your implementation should panic if up is parallel to the view direction.
-    fn test_look_at_up_is_parallel_to_view_direction() {
+    #[should_panic(expected = "The 'up' vector cannot be parallel to the view direction.")]
+    fn test_look_at_panics_on_parallel_up() {
         let eye = Vec3::new(0.0, 0.0, 0.0);
         let target = Vec3::new(0.0, 10.0, 0.0);
-        let up = Vec3::new(0.0, 1.0, 0.0); // Up is parallel to (target - eye)
-                                           // This creates a zero-length side vector after the cross product.
+        let up = Vec3::new(0.0, 1.0, 0.0);
         let _view = Mat4::look_at(eye, target, up);
     }
 
@@ -619,8 +626,8 @@ mod tests {
     }
 
     #[test]
-    #[should_panic] // Rotating around a zero-length axis is undefined.
-    fn test_from_axis_angle_zero_axis() {
+    #[should_panic(expected = "Rotation axis must have a non-zero length.")]
+    fn test_from_axis_angle_panics_on_zero_axis() {
         let _r = Mat4::from_axis_angle(Vec3::default(), std::f32::consts::FRAC_PI_2);
     }
 
@@ -721,5 +728,15 @@ mod tests {
 
         // A 360-degree rotation should result in an identity matrix.
         assert_mat4_approx_eq(r, Mat4::identity());
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serde_serialization_matrix() {
+        let m = Mat4::<f32>::from_translation(Vec3::new(1.0, 2.0, 3.0));
+        let json_string = serde_json::to_string(&m).expect("Serialization failed");
+        let m_deserialized: Mat4<f32> =
+            serde_json::from_str(&json_string).expect("Deserialization failed");
+        assert_eq!(m, m_deserialized);
     }
 }

@@ -7,6 +7,7 @@ macro_rules! impl_vector {
         $name:ident, ($($component:ident),+), $size:expr
     ) => {
         $(#[$meta])*
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[repr(C)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         pub struct $name<T> {
@@ -158,20 +159,26 @@ macro_rules! impl_vector {
 
         impl<T: Copy + Div<Output = T> + Zero + PartialEq> Div<T> for $name<T> {
             type Output = Self;
+            /// # Panics
+            ///
+            /// Panics if `rhs` is zero.
             #[inline]
             fn div(self, rhs: T) -> Self {
                 if rhs.is_zero() {
-                    panic!("attempt to divide vector by zero");
+                    panic!("attempt to divide vector by a zero scalar");
                 }
                 Self { $($component: self.$component / rhs),+ }
             }
         }
 
         impl<T: Copy + DivAssign<T> + Zero + PartialEq> DivAssign<T> for $name<T> {
+            /// # Panics
+            ///
+            /// Panics if `rhs` is zero.
             #[inline]
             fn div_assign(&mut self, rhs: T) {
                 if rhs.is_zero() {
-                    panic!("attempt to divide vector by zero");
+                    panic!("attempt to divide vector by a zero scalar");
                 }
                 $(self.$component /= rhs;)+
             }
@@ -235,15 +242,15 @@ macro_rules! impl_vector {
 
             /// Returns a normalized version of the vector (with a length of 1).
             ///
-            /// Returns a zero vector if the original vector has a length of zero.
+            /// This implementation returns a zero vector if the length is zero or non-finite.
             ///
             /// # Examples
             ///
             /// ```
             /// # use math_library::Vec2;
-            /// let v: Vec2<f32> = Vec2::new(3.0, 4.0);
+            /// let v = Vec2::new(3.0f32, 4.0f32);
             /// let norm = v.normalize();
-            /// assert!((norm.length() - 1.0).abs() < 1e-6);
+            /// assert!((norm.length() - 1.0f32).abs() < 1e-6);
             /// ```
             #[inline]
             pub fn normalize(self) -> Self {
@@ -410,11 +417,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "attempt to divide vector by a zero scalar")]
     fn test_division_by_zero() {
         let v = Vec2::new(1.0, 1.0);
         let _ = v / 0.0;
     }
+
     #[test]
     fn test_normalize_edge_cases() {
         // Normalizing a vector that is already normalized should not change it.
@@ -470,7 +478,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "attempt to divide vector by zero")]
+    #[should_panic(expected = "attempt to divide vector by a zero scalar")]
     fn test_div_assign_by_zero() {
         let mut v = Vec2::new(10.0, 20.0);
         v /= 0.0;
@@ -502,8 +510,7 @@ mod tests {
         assert!((norm_inf_both.x - expected.x).abs() < 1e-6);
         assert!((norm_inf_both.y - expected.y).abs() < 1e-6);
 
-        // Normalizing a vector containing NaN should result in a zero vector (or another NaN vector).
-        // Our robust implementation should produce a zero vector.
+        // Normalizing a vector containing NaN should result in a zero vector.
         let v_nan = Vec2::new(f32::NAN, 1.0);
         let norm_nan = v_nan.normalize();
         assert_eq!(norm_nan, Vec2::default());
@@ -557,5 +564,15 @@ mod tests {
         let dot_scalar_lhs = (v1 * s).dot(v2);
         let dot_scalar_rhs = s * v1.dot(v2);
         assert!((dot_scalar_lhs - dot_scalar_rhs).abs() < EPSILON);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serde_serialization_vector() {
+        let v = Vec3::new(1.0f32, 2.5, -3.0);
+        let json_string = serde_json::to_string(&v).expect("Serialization failed");
+        let v_deserialized: Vec3<f32> =
+            serde_json::from_str(&json_string).expect("Deserialization failed");
+        assert_eq!(v, v_deserialized);
     }
 }
