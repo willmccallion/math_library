@@ -399,4 +399,77 @@ mod tests {
         let v = Vec2::new(1.0, 1.0);
         let _ = v / 0.0;
     }
+    #[test]
+    fn test_normalize_edge_cases() {
+        // Normalizing a vector that is already normalized should not change it.
+        let v_normalized = Vec3::new(0.6, 0.8, 0.0);
+        let renorm = v_normalized.normalize();
+        assert!((renorm.x - v_normalized.x).abs() < EPSILON);
+        assert!((renorm.y - v_normalized.y).abs() < EPSILON);
+        assert!((renorm.z - v_normalized.z).abs() < EPSILON);
+
+        // Normalizing a vector with a very small length (but > epsilon)
+        let v_small = Vec3::new(f64::EPSILON * 2.0, 0.0, 0.0);
+        let norm_small = v_small.normalize();
+        assert!((norm_small.length() - 1.0).abs() < EPSILON);
+        assert!((norm_small.x - 1.0).abs() < EPSILON);
+    }
+
+    #[test]
+    fn test_length_edge_cases() {
+        // Length of a zero vector should be zero.
+        let zero = Vec2::<f64>::default();
+        assert_eq!(zero.length_squared(), 0.0);
+        assert_eq!(zero.length(), 0.0);
+
+        // Length should be correct for negative components.
+        let v = Vec2::new(-3.0, -4.0);
+        assert!((v.length() - 5.0).abs() < EPSILON);
+
+        // Length of a basis vector.
+        let v = Vec3::new(0.0, 5.0, 0.0);
+        assert!((v.length() - 5.0).abs() < EPSILON);
+    }
+
+    #[test]
+    fn test_integer_vectors() {
+        let v1 = Vec2::new(1i32, -2);
+        let v2 = Vec2::new(3, 4);
+
+        assert_eq!(v1 + v2, Vec2::new(4, 2));
+        assert_eq!(v1 * v2, Vec2::new(3, -8)); // Component-wise
+        assert_eq!(v1 * 3, Vec2::new(3, -6));
+        assert_eq!(v1.dot(v2), 3 - 8);
+        assert_eq!(-v1, Vec2::new(-1, 2));
+    }
+
+    #[test]
+    fn test_from_into_array() {
+        let v = Vec3::new(1, 2, 3);
+        let arr: [i32; 3] = v.into();
+        assert_eq!(arr, [1, 2, 3]);
+
+        let v_from_arr = Vec3::from(arr);
+        assert_eq!(v, v_from_arr);
+    }
+
+    #[test]
+    #[should_panic(expected = "attempt to divide vector by zero")]
+    fn test_div_assign_by_zero() {
+        let mut v = Vec2::new(10.0, 20.0);
+        v /= 0.0;
+    }
+
+    #[test]
+    fn test_repr_c_layout() {
+        // Check that the memory layout is as expected for FFI.
+        // For a Vec3<f32>, size should be 3 * 4 = 12 bytes.
+        // Alignment should be the same as f32.
+        use std::mem::{align_of, size_of};
+        assert_eq!(size_of::<Vec3<f32>>(), size_of::<f32>() * 3);
+        assert_eq!(align_of::<Vec3<f32>>(), align_of::<f32>());
+
+        assert_eq!(size_of::<Vec4<i64>>(), size_of::<i64>() * 4);
+        assert_eq!(align_of::<Vec4<i64>>(), align_of::<i64>());
+    }
 }

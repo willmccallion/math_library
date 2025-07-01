@@ -117,6 +117,10 @@ impl<T: Float> Mat4<T> {
     /// assert!((v_rotated.z - expected.z).abs() < 1e-6);
     /// ```
     pub fn from_axis_angle(axis: Vec3<T>, angle: T) -> Self {
+        let len_sq = axis.length_squared();
+        if len_sq < T::epsilon() * T::epsilon() {
+            panic!("Rotation axis must have a non-zero length.");
+        }
         let (s, c) = angle.sin_cos();
         let axis = axis.normalize();
         let t = T::one() - c;
@@ -162,9 +166,21 @@ impl<T: Float> Mat4<T> {
     /// let transformed_point = view_matrix * point_at_origin;
     /// assert_eq!(transformed_point, Vec4::new(0.0, 0.0, -5.0, 1.0));
     /// ```
+    // In matrix.rs
     pub fn look_at(eye: Vec3<T>, target: Vec3<T>, up: Vec3<T>) -> Self {
-        let f = (target - eye).normalize();
-        let s = f.cross(up).normalize();
+        let f_unnormalized = target - eye;
+
+        if f_unnormalized.length_squared() < T::epsilon() * T::epsilon() {
+            panic!("The 'eye' and 'target' positions cannot be the same.");
+        }
+        let f = f_unnormalized.normalize();
+
+        let s_unnormalized = f.cross(up);
+        if s_unnormalized.length_squared() < T::epsilon() * T::epsilon() {
+            panic!("The 'up' vector cannot be parallel to the view direction.");
+        }
+        let s = s_unnormalized.normalize();
+
         let u = s.cross(f);
 
         Self {
@@ -176,7 +192,57 @@ impl<T: Float> Mat4<T> {
     }
 
     /// Creates a perspective projection matrix.
+    ///
+    /// This matrix transforms vertices from view space to clip space. It creates the illusion
+    /// of depth by making objects that are further away appear smaller.
+    ///
+    /// # Arguments
+    ///
+    /// * `fovy`: The vertical field of view, in radians.
+    /// * `aspect_ratio`: The aspect ratio of the viewport (`width / height`).
+    /// * `near`: The distance to the near clipping plane. Must be positive.
+    /// * `far`: The distance to the far clipping plane. Must be greater than `near`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `fovy`, `aspect_ratio`, or `near` are not positive, or if `far` is not
+    /// greater than `near`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use math_library::{Mat4, Vec4};
+    /// # use std::f32::consts::FRAC_PI_2;
+    /// let aspect_ratio = 16.0 / 9.0;
+    /// let fovy = FRAC_PI_2; // 90 degrees
+    /// let near = 0.1;
+    /// let far = 100.0;
+    ///
+    /// let proj = Mat4::perspective(fovy, aspect_ratio, near, far);
+    ///
+    /// // A point on the near plane should be mapped to z = -1 in NDC.
+    /// let point_on_near_plane = Vec4::new(1.0, 1.0, -near, 1.0);
+    /// let transformed_near = proj * point_on_near_plane;
+    /// let ndc_z_near = transformed_near.z / transformed_near.w;
+    /// assert!((ndc_z_near - (-1.0)).abs() < 1e-6);
+    ///
+    /// // A point on the far plane should be mapped to z = 1 in NDC.
+    /// let point_on_far_plane = Vec4::new(50.0, 50.0, -far, 1.0);
+    /// let transformed_far = proj * point_on_far_plane;
+    /// let ndc_z_far = transformed_far.z / transformed_far.w;
+    /// assert!((ndc_z_far - 1.0).abs() < 1e-6);
+    /// ```
     pub fn perspective(fovy: T, aspect_ratio: T, near: T, far: T) -> Self {
+        assert!(fovy > T::zero(), "Field of view must be positive.");
+        assert!(aspect_ratio > T::zero(), "Aspect ratio must be positive.");
+        assert!(
+            far > near,
+            "The 'far' plane must be further than the 'near' plane."
+        );
+        assert!(
+            near > T::zero(),
+            "The 'near' plane distance must be positive."
+        );
         let f = T::one() / (fovy / (T::one() + T::one())).tan();
         Self {
             col1: Vec4::new(f / aspect_ratio, T::zero(), T::zero(), T::zero()),
@@ -506,5 +572,88 @@ mod tests {
         let i = Mat4::identity();
         assert_eq!(m * i, m);
         assert_eq!(i * m, m);
+    }
+    #[test]
+    fn test_transpose_properties() {
+        let m = Mat4::from_translation(Vec3::new(10.0, 20.0, 30.0))
+            * Mat4::from_axis_angle(Vec3::new(1.0, 2.0, 3.0), 0.5);
+
+        // The transpose of a transpose is the original matrix.
+        let m_t = m.transpose();
+        let m_t_t = m_t.transpose();
+        assert_mat4_approx_eq(m, m_t_t);
+
+        // (A * B)^T = B^T * A^T
+        let a = Mat4::from_translation(Vec3::new(1.0, 2.0, 3.0));
+        let b = Mat4::from_scale(Vec3::new(4.0, 5.0, 6.0));
+        let ab_t = (a * b).transpose();
+        let b_t_a_t = b.transpose() * a.transpose();
+        assert_mat4_approx_eq(ab_t, b_t_a_t);
+    }
+
+    #[test]
+    #[should_panic] // Your implementation should panic if the view direction is zero.
+    fn test_look_at_eye_equals_target() {
+        let eye = Vec3::new(1.0, 2.0, 3.0);
+        let up = Vec3::new(0.0, 1.0, 0.0);
+        // This creates a zero-length forward vector, which cannot be normalized.
+        let _view = Mat4::look_at(eye, eye, up);
+    }
+
+    #[test]
+    #[should_panic] // Your implementation should panic if up is parallel to the view direction.
+    fn test_look_at_up_is_parallel_to_view_direction() {
+        let eye = Vec3::new(0.0, 0.0, 0.0);
+        let target = Vec3::new(0.0, 10.0, 0.0);
+        let up = Vec3::new(0.0, 1.0, 0.0); // Up is parallel to (target - eye)
+                                           // This creates a zero-length side vector after the cross product.
+        let _view = Mat4::look_at(eye, target, up);
+    }
+
+    #[test]
+    fn test_from_axis_angle_zero_angle() {
+        let axis = Vec3::new(1.0, 2.0, 3.0);
+        let r = Mat4::from_axis_angle(axis, 0.0);
+        // A zero-angle rotation should be an identity matrix.
+        assert_mat4_approx_eq(r, Mat4::identity());
+    }
+
+    #[test]
+    #[should_panic] // Rotating around a zero-length axis is undefined.
+    fn test_from_axis_angle_zero_axis() {
+        let _r = Mat4::from_axis_angle(Vec3::default(), std::f32::consts::FRAC_PI_2);
+    }
+
+    #[test]
+    fn test_perspective_projection() {
+        let aspect_ratio = 16.0 / 9.0;
+        let fovy = std::f32::consts::FRAC_PI_2; // 90 degrees
+        let near = 0.1;
+        let far = 100.0;
+        let proj = Mat4::perspective(fovy, aspect_ratio, near, far);
+
+        // A point on the near plane should be mapped to z = -1 in NDC.
+        let p_near = Vec4::new(0.5, 0.5, -near, 1.0);
+        let p_clip_near = proj * p_near;
+        // After perspective divide (dividing by w), z should be -1.
+        assert!((p_clip_near.z / p_clip_near.w - (-1.0)).abs() < EPSILON);
+
+        // A point on the far plane should be mapped to z = 1 in NDC.
+        let p_far = Vec4::new(50.0, 50.0, -far, 1.0);
+        let p_clip_far = proj * p_far;
+        // After perspective divide, z should be 1.
+        assert!((p_clip_far.z / p_clip_far.w - 1.0).abs() < EPSILON);
+    }
+
+    #[test]
+    #[should_panic] // near plane must be smaller than far plane
+    fn test_perspective_invalid_planes() {
+        Mat4::perspective(std::f32::consts::FRAC_PI_2, 16.0 / 9.0, 10.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic] // field of view must be positive
+    fn test_perspective_invalid_fovy() {
+        Mat4::perspective(0.0, 16.0 / 9.0, 0.1, 100.0);
     }
 }
