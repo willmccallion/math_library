@@ -3,9 +3,9 @@
 <!-- Badges: Replace placeholders when you publish and set up CI -->
 [![Crates.io](https://img.shields.io/crates/v/math_library.svg)](https://crates.io/crates/math_library)
 [![Docs.rs](https://docs.rs/math_library/badge.svg)](https://docs.rs/math_library)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](https://github.com/willmccallion/math_library/blob/main/LICENSE-MIT)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
 <!--
-[![CI](https://github.com/your_username/your_repo_name/actions/workflows/ci.yml/badge.svg)](https://github.com/your_username/your_repo_name/actions/workflows/ci.yml)
+[![CI](https://github.com/willmccallion/math_library/actions/workflows/ci.yml/badge.svg)](https://github.com/willmccallion/math_library/actions/workflows/ci.yml)
 -->
 
 A simple and fast 2D/3D/4D math library for graphics and games, written in pure, stable Rust.
@@ -121,12 +121,7 @@ cargo test --doc
 
 ## License
 
-This project is licensed under either of
-
--   Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
--   MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
+This project is dual-licensed under your choice of either the [MIT License](LICENCE-MIT) or the [Apache License, Version 2.0](LICENCE-APACHE).
 
 ### Contribution
 
