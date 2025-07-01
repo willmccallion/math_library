@@ -248,10 +248,26 @@ macro_rules! impl_vector {
             #[inline]
             pub fn normalize(self) -> Self {
                 let len = self.length();
-                if len <= T::epsilon() {
-                    Self::default()
+
+                if len.is_finite() && len > T::epsilon() {
+                    return self / len;
+                }
+
+                let norm = Self::new(
+                    $(
+                        if self.$component.is_infinite() {
+                            self.$component.signum()
+                        } else {
+                            T::zero()
+                        }
+                    ),+
+                );
+
+                let norm_len = norm.length();
+                if norm_len > T::epsilon() {
+                    norm / norm_len
                 } else {
-                    self / len
+                    Self::default()
                 }
             }
         }
@@ -471,5 +487,75 @@ mod tests {
 
         assert_eq!(size_of::<Vec4<i64>>(), size_of::<i64>() * 4);
         assert_eq!(align_of::<Vec4<i64>>(), align_of::<i64>());
+    }
+
+    #[test]
+    fn test_normalize_special_floats() {
+        // Normalizing a vector with an infinite component should produce a unit vector.
+        let v_inf = Vec2::new(f32::INFINITY, 10.0);
+        let norm_inf = v_inf.normalize();
+        assert_eq!(norm_inf, Vec2::new(1.0, 0.0));
+
+        let v_inf_both = Vec2::new(-f32::INFINITY, f32::INFINITY);
+        let norm_inf_both = v_inf_both.normalize();
+        let expected = Vec2::new(-1.0 / f32::sqrt(2.0), 1.0 / f32::sqrt(2.0));
+        assert!((norm_inf_both.x - expected.x).abs() < 1e-6);
+        assert!((norm_inf_both.y - expected.y).abs() < 1e-6);
+
+        // Normalizing a vector containing NaN should result in a zero vector (or another NaN vector).
+        // Our robust implementation should produce a zero vector.
+        let v_nan = Vec2::new(f32::NAN, 1.0);
+        let norm_nan = v_nan.normalize();
+        assert_eq!(norm_nan, Vec2::default());
+    }
+
+    #[test]
+    fn test_length_with_large_numbers() {
+        // Test for potential overflow in length_squared before the sqrt
+        let v = Vec2::new(f32::MAX, 0.0);
+        // The squared length overflows to infinity, so the length is also infinity.
+        assert_eq!(v.length(), f32::INFINITY);
+
+        let v_large = Vec2::new(1e20, 1e20);
+        // length_squared would be 2e40, which overflows f32. The result is inf.
+        assert_eq!(v_large.length_squared(), f32::INFINITY);
+        assert_eq!(v_large.length(), f32::INFINITY);
+    }
+
+    #[test]
+    #[cfg(debug_assertions)] // Integer overflow panics in debug builds
+    #[should_panic]
+    fn test_integer_vector_overflow() {
+        let v1 = Vec2::new(i32::MAX, 0);
+        let v2 = Vec2::new(1, 0);
+        let _ = v1 + v2; // This should panic due to overflow
+    }
+
+    #[test]
+    fn test_component_wise_multiplication() {
+        let v1 = Vec3::new(2.0, 3.0, 4.0);
+        let v2 = Vec3::new(5.0, 6.0, 7.0);
+        assert_eq!(v1 * v2, Vec3::new(10.0, 18.0, 28.0));
+    }
+
+    #[test]
+    fn test_dot_product_properties() {
+        let v1 = Vec3::new(1.0, -2.0, 3.5);
+        let v2 = Vec3::new(4.0, 5.0, 6.0);
+        let s = 2.5;
+
+        // Test commutativity: a · b = b · a
+        assert!((v1.dot(v2) - v2.dot(v1)).abs() < EPSILON);
+
+        // Test distributivity: a · (b + c) = a · b + a · c
+        let v3 = Vec3::new(-1.0, 0.0, 1.0);
+        let dot_dist_lhs = v1.dot(v2 + v3);
+        let dot_dist_rhs = v1.dot(v2) + v1.dot(v3);
+        assert!((dot_dist_lhs - dot_dist_rhs).abs() < EPSILON);
+
+        // Test scalar multiplication: (s * a) · b = s * (a · b)
+        let dot_scalar_lhs = (v1 * s).dot(v2);
+        let dot_scalar_rhs = s * v1.dot(v2);
+        assert!((dot_scalar_lhs - dot_scalar_rhs).abs() < EPSILON);
     }
 }

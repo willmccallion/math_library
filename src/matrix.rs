@@ -656,4 +656,70 @@ mod tests {
     fn test_perspective_invalid_fovy() {
         Mat4::perspective(0.0, 16.0 / 9.0, 0.1, 100.0);
     }
+
+    #[test]
+    fn test_default_is_identity() {
+        assert_eq!(Mat4::<f32>::default(), Mat4::identity());
+    }
+
+    #[test]
+    fn test_inverse_of_rotation() {
+        let axis = Vec3::new(1.0, 2.0, 3.0).normalize();
+        let angle = 0.785; // 45 degrees
+        let rot = Mat4::from_axis_angle(axis, angle);
+
+        let inv = rot.inverse().unwrap();
+        let transpose = rot.transpose();
+
+        // For a pure rotation matrix, the inverse is equal to its transpose.
+        assert_mat4_approx_eq(inv, transpose);
+    }
+
+    #[test]
+    fn test_from_scale_edge_cases() {
+        // Test scaling by zero
+        let s_zero = Mat4::from_scale(Vec3::new(2.0, 0.0, 5.0));
+        let v = Vec4::new(1.0, 100.0, 1.0, 1.0);
+        let v_scaled = s_zero * v;
+        assert_vec4_approx_eq(v_scaled, Vec4::new(2.0, 0.0, 5.0, 1.0));
+
+        // Test negative scaling (reflection)
+        let s_neg = Mat4::from_scale(Vec3::new(-1.0, 1.0, 1.0));
+        let v_reflected = s_neg * v;
+        assert_vec4_approx_eq(v_reflected, Vec4::new(-1.0, 100.0, 1.0, 1.0));
+    }
+
+    #[test]
+    fn test_look_at_basis_is_orthonormal() {
+        let eye = Vec3::new(10.0, 20.0, 30.0);
+        let target = Vec3::new(11.0, 20.0, 31.0);
+        let up = Vec3::new(0.0, 1.0, 0.0);
+        let view = Mat4::look_at(eye, target, up);
+
+        // The rotation part of the view matrix is formed by three orthonormal basis vectors:
+        // s (side), u (up), and -f (forward).
+        let s = Vec3::new(view.col1.x, view.col2.x, view.col3.x);
+        let u = Vec3::new(view.col1.y, view.col2.y, view.col3.y);
+        let f = -Vec3::new(view.col1.z, view.col2.z, view.col3.z);
+
+        // Check for unit length (within tolerance)
+        assert!((s.length() - 1.0).abs() < EPSILON);
+        assert!((u.length() - 1.0).abs() < EPSILON);
+        assert!((f.length() - 1.0).abs() < EPSILON);
+
+        // Check for orthogonality (dot product is zero)
+        assert!(s.dot(u).abs() < EPSILON);
+        assert!(s.dot(f).abs() < EPSILON);
+        assert!(u.dot(f).abs() < EPSILON);
+    }
+
+    #[test]
+    fn test_from_axis_angle_full_rotation() {
+        let axis = Vec3::new(0.267, 0.534, 0.802); // Arbitrary normalized vector
+        let angle = 2.0 * std::f32::consts::PI; // 360 degrees
+        let r = Mat4::from_axis_angle(axis, angle);
+
+        // A 360-degree rotation should result in an identity matrix.
+        assert_mat4_approx_eq(r, Mat4::identity());
+    }
 }
