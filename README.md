@@ -63,7 +63,7 @@ assert_eq!(i.dot(j), 0.0);
 assert_eq!(i.cross(j), Vec3::new(0.0, 0.0, 1.0)); // k
 
 // Normalization
-let v = Vec3::new(3.0, 4.0, 0.0);
+let v = Vec3::<f32>::new(3.0, 4.0, 0.0);
 assert_eq!(v.length(), 5.0);
 
 let norm_v = v.normalize();
