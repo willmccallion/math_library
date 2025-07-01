@@ -1,0 +1,17 @@
+[package]
+name = "math_library"
+version = "0.1.0"
+edition = "2024"
+authors = ["Will McCallion"]
+license = "MIT OR Apache-2.0"
+description = "A simple and fast 2D/3D/4D math library for graphics and games."
+repository = "https://github.com/willmccallion/math_library"
+readme = "README.md"
+keywords = ["math", "vector", "matrix", "linear-algebra", "gamedev"]
+categories = ["mathematics", "game-development", "graphics"]
+exclude = [
+    ".gitignore",
+]
+
+[dependencies]
+num-traits = "0.2"
