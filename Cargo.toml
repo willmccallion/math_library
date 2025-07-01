@@ -1,11 +1,11 @@
 [package]
-name = "math_library"
+name = "vecmath"
 version = "0.1.0"
 edition = "2024"
 authors = ["Will McCallion wcmccallion@gmail.com"]
 license = "MIT OR Apache-2.0"
 description = "A simple and fast 2D/3D/4D math library for graphics and games."
-repository = "https://github.com/willmccallion/math_library"
+repository = "https://github.com/willmccallion/vecmath"
 readme = "README.md"
 keywords = ["math", "vector", "matrix", "linear-algebra", "gamedev"]
 categories = ["mathematics", "game-development", "graphics"]
@@ -14,10 +14,13 @@ exclude = [
 ]
 
 [dependencies]
-num-traits = "0.2"
-serde = { version = "1.0", optional = true, features=["derive"]}
+num-traits = { version = "0.2", default-features = false, features = ["libm"] }
+serde = { version = "1.0", optional = true, default-features = false, features=["derive"]}
+libm = "0.2"
 
 [features]
+default = []
+std = ["num-traits/std", "serde/std"]
 serde = ["dep:serde"]
 
 [dev-dependencies]

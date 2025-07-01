@@ -1,6 +1,6 @@
 use crate::vector::{Vec3, Vec4};
+use core::ops::{Add, Mul, MulAssign};
 use num_traits::{Float, One, Zero};
-use std::ops::{Add, Mul, MulAssign};
 
 /// A 4x4, column-major matrix.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -19,7 +19,7 @@ impl<T: Copy + One + Zero> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec4};
+    /// # use vecmath::{Mat4, Vec4};
     /// let m = Mat4::new(
     ///     Vec4::new(1i32, 2, 3, 4),
     ///     Vec4::new(5, 6, 7, 8),
@@ -42,7 +42,7 @@ impl<T: Copy + One + Zero> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec4};
+    /// # use vecmath::{Mat4, Vec4};
     /// let id = Mat4::<f32>::identity();
     /// let v = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// assert_eq!(id * v, v);
@@ -70,7 +70,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec3, Vec4};
+    /// # use vecmath::{Mat4, Vec3, Vec4};
     /// let t = Mat4::from_translation(Vec3::new(10.0f32, 20.0, 30.0));
     /// let p = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// let p_translated = t * p;
@@ -88,7 +88,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec3, Vec4};
+    /// # use vecmath::{Mat4, Vec3, Vec4};
     /// let s = Mat4::from_scale(Vec3::new(2.0f32, 3.0, 4.0));
     /// let v = Vec4::new(1.0, 2.0, 3.0, 1.0);
     /// let v_scaled = s * v;
@@ -112,8 +112,8 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec3, Vec4};
-    /// # use std::f32::consts::FRAC_PI_2;
+    /// # use vecmath::{Mat4, Vec3, Vec4};
+    /// # use core::f32::consts::FRAC_PI_2;
     /// let r = Mat4::from_axis_angle(Vec3::new(0.0f32, 1.0, 0.0), FRAC_PI_2);
     /// let v = Vec4::new(1.0, 0.0, 0.0, 1.0);
     /// let v_rotated = r * v;
@@ -165,7 +165,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec3, Vec4};
+    /// # use vecmath::{Mat4, Vec3, Vec4};
     /// let eye = Vec3::new(0.0f32, 0.0, 5.0);
     /// let target = Vec3::new(0.0, 0.0, 0.0);
     /// let up = Vec3::new(0.0, 1.0, 0.0);
@@ -220,8 +220,8 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec4};
-    /// # use std::f32::consts::FRAC_PI_2;
+    /// # use vecmath::{Mat4, Vec4};
+    /// # use core::f32::consts::FRAC_PI_2;
     /// let aspect_ratio = 16.0 / 9.0;
     /// let fovy = FRAC_PI_2; // 90 degrees
     /// let near = 0.1;
@@ -273,7 +273,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec4};
+    /// # use vecmath::{Mat4, Vec4};
     /// let m = Mat4::new(
     ///     Vec4::new(1.0f32, 2.0, 3.0, 4.0),
     ///     Vec4::new(5.0, 6.0, 7.0, 8.0),
@@ -299,7 +299,7 @@ impl<T: Float> Mat4<T> {
     /// # Examples
     ///
     /// ```
-    /// # use math_library::{Mat4, Vec3};
+    /// # use vecmath::{Mat4, Vec3};
     /// let m = Mat4::from_translation(Vec3::new(10.0f32, -5.0, 2.0));
     /// let m_inv = m.inverse().unwrap();
     /// let identity = m * m_inv;
@@ -435,7 +435,7 @@ impl<T: Float> Mat4<T> {
         ))
     }
 
-    fn to_2d_array(&self) -> [[T; 4]; 4] {
+    fn to_2d_array(self) -> [[T; 4]; 4] {
         [
             [self.col1.x, self.col2.x, self.col3.x, self.col4.x],
             [self.col1.y, self.col2.y, self.col3.y, self.col4.y],
@@ -558,7 +558,7 @@ mod tests {
 
     #[test]
     fn test_multiplication_order() {
-        let r = Mat4::from_axis_angle(Vec3::new(0.0, 1.0, 0.0), std::f32::consts::FRAC_PI_2);
+        let r = Mat4::from_axis_angle(Vec3::new(0.0, 1.0, 0.0), core::f32::consts::FRAC_PI_2);
         let t = Mat4::from_translation(Vec3::new(10.0, 0.0, 0.0));
 
         let rt = t * r;
@@ -628,13 +628,13 @@ mod tests {
     #[test]
     #[should_panic(expected = "Rotation axis must have a non-zero length.")]
     fn test_from_axis_angle_panics_on_zero_axis() {
-        let _r = Mat4::from_axis_angle(Vec3::default(), std::f32::consts::FRAC_PI_2);
+        let _r = Mat4::from_axis_angle(Vec3::default(), core::f32::consts::FRAC_PI_2);
     }
 
     #[test]
     fn test_perspective_projection() {
         let aspect_ratio = 16.0 / 9.0;
-        let fovy = std::f32::consts::FRAC_PI_2; // 90 degrees
+        let fovy = core::f32::consts::FRAC_PI_2; // 90 degrees
         let near = 0.1;
         let far = 100.0;
         let proj = Mat4::perspective(fovy, aspect_ratio, near, far);
@@ -655,7 +655,7 @@ mod tests {
     #[test]
     #[should_panic] // near plane must be smaller than far plane
     fn test_perspective_invalid_planes() {
-        Mat4::perspective(std::f32::consts::FRAC_PI_2, 16.0 / 9.0, 10.0, 1.0);
+        Mat4::perspective(core::f32::consts::FRAC_PI_2, 16.0 / 9.0, 10.0, 1.0);
     }
 
     #[test]
@@ -723,7 +723,7 @@ mod tests {
     #[test]
     fn test_from_axis_angle_full_rotation() {
         let axis = Vec3::new(0.267, 0.534, 0.802); // Arbitrary normalized vector
-        let angle = 2.0 * std::f32::consts::PI; // 360 degrees
+        let angle = 2.0 * core::f32::consts::PI; // 360 degrees
         let r = Mat4::from_axis_angle(axis, angle);
 
         // A 360-degree rotation should result in an identity matrix.
